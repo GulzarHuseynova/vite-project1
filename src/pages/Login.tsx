@@ -6,8 +6,6 @@ import type { RegisterForm } from "../types/Register.type";
 import { AxiosError } from "axios";
 import {
   Button,
-  Checkbox,
-  Divider,
   Form,
   Input,
   Typography,
@@ -18,96 +16,67 @@ import {
   MailOutlined,
   EyeInvisibleOutlined,
   EyeTwoTone,
-  GoogleOutlined,
   SafetyCertificateOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 
+interface Props {
+  onLoginSuccess: () => void;
+}
+
 const { Title, Text } = Typography;
 
-export default function LoginPage() {
+export default function LoginPage({ onLoginSuccess }: Props) {
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState<"login" | "register">("login");
   const navigate = useNavigate();
 
-  const handleLogin = async (
-    values: LoginForm
-  ) => {
+  const handleLogin = async (values: LoginForm) => {
     setLoading(true);
 
     try {
-      const response =
-        await AuthService.login(values);
+      const response = await AuthService.login(values);
 
-      console.log(
-        "LOGIN RESPONSE:",
-        response.data
-      );
+      console.log("LOGIN RESPONSE:", response.data);
 
       const accessToken =
         response.data?.accessToken ||
-        response.data?.data
-          ?.accessToken ||
-        response.data?.result
-          ?.accessToken;
+        response.data?.data?.accessToken ||
+        response.data?.result?.accessToken;
 
       const refreshToken =
         response.data?.refreshToken ||
-        response.data?.data
-          ?.refreshToken ||
-        response.data?.result
-          ?.refreshToken;
+        response.data?.data?.refreshToken ||
+        response.data?.result?.refreshToken;
 
       if (!accessToken) {
         alert("Token gəlmədi!");
         return;
       }
 
-      localStorage.setItem(
-        "accessToken",
-        accessToken
-      );
+      localStorage.setItem("accessToken", accessToken);
 
       if (refreshToken) {
-        localStorage.setItem(
-          "refreshToken",
-          refreshToken
-        );
+        localStorage.setItem("refreshToken", refreshToken);
       }
 
-      const profileResponse =
-        await AuthService.getProfile();
+      const profileResponse = await AuthService.getProfile();
 
-      console.log(
-        "PROFILE RESPONSE:",
-        profileResponse.data
-      );
+      console.log("PROFILE RESPONSE:", profileResponse.data);
 
       const user =
         profileResponse.data?.user ||
         profileResponse.data?.data ||
         profileResponse.data;
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify(user)
-      );
+      localStorage.setItem("user", JSON.stringify(user));
 
-      console.log(
-        "USER SAVED:",
-        user
-      );
+      console.log("USER SAVED:", user);
 
-      navigate("/home");
+      onLoginSuccess(); // ← navigate("/home") əvəzinə
     } catch (error: unknown) {
-      const err = error as AxiosError<{
-        message?: string;
-      }>;
-
-      alert(
-        err.response?.data?.message ||
-        "Login xətası!"
-      );
+      const err = error as AxiosError<{ message?: string }>;
+      alert(err.response?.data?.message || "Login xətası!");
     } finally {
       setLoading(false);
     }
@@ -119,25 +88,17 @@ export default function LoginPage() {
     try {
       await AuthService.register(values);
 
-      alert(
-        "Qeydiyyat uğurludur! OTP Telegram botuna göndərildi."
-      );
+      alert("Qeydiyyat uğurludur! OTP Telegram botuna göndərildi.");
 
       navigate("/verify", {
         state: { email: values.email },
       });
     } catch (error: unknown) {
-      const err = error as AxiosError<{
-        message?: string | string[];
-      }>;
-
+      const err = error as AxiosError<{ message?: string | string[] }>;
       const msg = err.response?.data?.message;
-
       alert(
         "Qeydiyyat xətası: " +
-        (Array.isArray(msg)
-          ? msg.join(", ")
-          : msg ?? err.message)
+          (Array.isArray(msg) ? msg.join(", ") : msg ?? err.message)
       );
     } finally {
       setLoading(false);
@@ -161,40 +122,21 @@ export default function LoginPage() {
               Təhlükəsiz Giriş
             </span>
 
-            <Title
-              level={1}
-              className="text-white! mt-10! mb-6! text-6xl! leading-tight!"
-            >
+            <Title level={1} className="text-white! mt-10! mb-6! text-6xl! leading-tight!">
               Yenidən <br />
               Xoş Gəlmisiniz.
             </Title>
 
-            <Text className="text-slate-300! text-lg! leading-8! block max-w-lg">
-              Tailwind CSS və Ant Design istifadə edilərək hazırlanmış premium giriş təcrübəsi ilə panelinizə daxil olun.
-            </Text>
-
             <div className="mt-10 grid grid-cols-2 gap-5">
-
               <div className="bg-white/10 rounded-2xl border border-white/10 p-5 backdrop-blur-md">
-                <h3 className="text-3xl font-bold">
-                  99.9%
-                </h3>
-
-                <p className="text-slate-300 text-sm mt-1">
-                  Təhlükəsizlik Qoruması
-                </p>
+                <h3 className="text-3xl font-bold">99.9%</h3>
+                <p className="text-slate-300 text-sm mt-1">Təhlükəsizlik Qoruması</p>
               </div>
 
               <div className="bg-white/10 rounded-2xl border border-white/10 p-5 backdrop-blur-md">
-                <h3 className="text-3xl font-bold">
-                  24/7
-                </h3>
-
-                <p className="text-slate-300 text-sm mt-1">
-                  Sistem Nəzarəti
-                </p>
+                <h3 className="text-3xl font-bold">24/7</h3>
+                <p className="text-slate-300 text-sm mt-1">Sistem Nəzarəti</p>
               </div>
-
             </div>
           </div>
 
@@ -202,12 +144,8 @@ export default function LoginPage() {
             <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shrink-0">
               🔐
             </div>
-
             <div>
-              <h3 className="font-semibold text-lg">
-                Minlərlə istifadəçinin etibarı
-              </h3>
-
+              <h3 className="font-semibold text-lg">Minlərlə istifadəçinin etibarı</h3>
               <p className="text-slate-300 text-sm mt-1 leading-6">
                 Müasir veb tətbiqləri üçün gözəl və təhlükəsiz autentifikasiya interfeysi.
               </p>
@@ -216,44 +154,25 @@ export default function LoginPage() {
         </div>
 
         <div className="flex items-center justify-center p-8 md:p-14 bg-white/70 backdrop-blur-xl">
-
           <div className="w-full max-w-md">
-
             {view === "login" ? (
               <>
                 <div className="mb-8 text-center lg:text-left">
-                  <Title
-                    level={2}
-                    className="mb-2! text-slate-900! text-4xl!"
-                  >
+                  <Title level={2} className="mb-2! text-slate-900! text-4xl!">
                     Daxil Ol
                   </Title>
-
                   <Text className="text-slate-500! text-base">
                     Davam etmək üçün məlumatlarınızı daxil edin.
                   </Text>
                 </div>
 
-                <Form
-                  layout="vertical"
-                  size="large"
-                  onFinish={handleLogin}
-                >
-
+                <Form layout="vertical" size="large" onFinish={handleLogin}>
                   <Form.Item
                     label="E-poçt Ünvanı"
                     name="email"
                     rules={[
-                      {
-                        required: true,
-                        message:
-                          "Zəhmət olmasa e-poçtunuzu daxil edin!",
-                      },
-                      {
-                        type: "email",
-                        message:
-                          "E-poçt formatı yanlışdır!",
-                      },
+                      { required: true, message: "Zəhmət olmasa e-poçtunuzu daxil edin!" },
+                      { type: "email", message: "E-poçt formatı yanlışdır!" },
                     ]}
                   >
                     <Input
@@ -267,44 +186,19 @@ export default function LoginPage() {
                     label="Şifrə"
                     name="password"
                     rules={[
-                      {
-                        required: true,
-                        message:
-                          "Zəhmət olmasa şifrənizi daxil edin!",
-                      },
-                      {
-                        min: 6,
-                        message:
-                          "Şifrə minimum 6 simvol olmalıdır!",
-                      },
+                      { required: true, message: "Zəhmət olmasa şifrənizi daxil edin!" },
+                      { min: 6, message: "Şifrə minimum 6 simvol olmalıdır!" },
                     ]}
                   >
                     <Input.Password
                       prefix={<LockOutlined />}
                       iconRender={(visible) =>
-                        visible ? (
-                          <EyeTwoTone />
-                        ) : (
-                          <EyeInvisibleOutlined />
-                        )
+                        visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
                       }
                       placeholder="Şifrənizi daxil edin"
                       className="rounded-2xl h-14!"
                     />
                   </Form.Item>
-
-                  <div className="flex items-center justify-between mb-6 text-sm flex-wrap gap-3">
-                    <Checkbox>
-                      Məni xatırla
-                    </Checkbox>
-
-                    <button
-                      type="button"
-                      className="text-slate-500 hover:text-slate-900 transition font-medium"
-                    >
-                      Şifrəni unutmusunuz?
-                    </button>
-                  </div>
 
                   <Button
                     htmlType="submit"
@@ -318,27 +212,12 @@ export default function LoginPage() {
                   </Button>
                 </Form>
 
-                <Divider plain>
-                  VƏ YA DAVAM EDİN
-                </Divider>
-
-                <Button
-                  icon={<GoogleOutlined />}
-                  block
-                  size="large"
-                  className="h-14! rounded-2xl! hover:border-slate-900!"
-                >
-                  Google ilə davam et
-                </Button>
-
                 <div className="mt-8 text-center">
                   <Text className="text-slate-500! text-base">
                     Hesabınız yoxdur?{" "}
                     <span
                       className="font-semibold text-slate-900 cursor-pointer hover:underline"
-                      onClick={() =>
-                        setView("register")
-                      }
+                      onClick={() => setView("register")}
                     >
                       Hesab Yarat
                     </span>
@@ -348,75 +227,37 @@ export default function LoginPage() {
             ) : (
               <>
                 <div className="mb-8 text-center lg:text-left">
-                  <Title
-                    level={2}
-                    className="mb-2! text-slate-900! text-4xl!"
-                  >
+                  <Title level={2} className="mb-2! text-slate-900! text-4xl!">
                     Hesab Yarat
                   </Title>
-
                   <Text className="text-slate-500! text-base">
-                    Başlamaq üçün qeydiyyatdan keçin.
-                    Təsdiq kodu Telegram-a göndəriləcək.
+                    Başlamaq üçün qeydiyyatdan keçin. Təsdiq kodu Telegram-a göndəriləcək.
                   </Text>
                 </div>
 
-                <Form
-                  layout="vertical"
-                  size="large"
-                  onFinish={handleRegister}
-                >
-
+                <Form layout="vertical" size="large" onFinish={handleRegister}>
                   <Form.Item
                     label="Ad"
                     name="firstName"
-                    rules={[
-                      {
-                        required: true,
-                        message:
-                          "Zəhmət olmasa adınızı daxil edin!",
-                      },
-                    ]}
+                    rules={[{ required: true, message: "Zəhmət olmasa adınızı daxil edin!" }]}
                   >
-                    <Input
-                      prefix={<UserOutlined />}
-                      placeholder="Ad"
-                      className="rounded-2xl h-14!"
-                    />
+                    <Input prefix={<UserOutlined />} placeholder="Ad" className="rounded-2xl h-14!" />
                   </Form.Item>
 
                   <Form.Item
                     label="Soyad"
                     name="lastName"
-                    rules={[
-                      {
-                        required: true,
-                        message:
-                          "Zəhmət olmasa soyadınızı daxil edin!",
-                      },
-                    ]}
+                    rules={[{ required: true, message: "Zəhmət olmasa soyadınızı daxil edin!" }]}
                   >
-                    <Input
-                      prefix={<UserOutlined />}
-                      placeholder="Soyad"
-                      className="rounded-2xl h-14!"
-                    />
+                    <Input prefix={<UserOutlined />} placeholder="Soyad" className="rounded-2xl h-14!" />
                   </Form.Item>
 
                   <Form.Item
                     label="E-poçt Ünvanı"
                     name="email"
                     rules={[
-                      {
-                        required: true,
-                        message:
-                          "Zəhmət olmasa e-poçtunuzu daxil edin!",
-                      },
-                      {
-                        type: "email",
-                        message:
-                          "E-poçt formatı yanlışdır!",
-                      },
+                      { required: true, message: "Zəhmət olmasa e-poçtunuzu daxil edin!" },
+                      { type: "email", message: "E-poçt formatı yanlışdır!" },
                     ]}
                   >
                     <Input
@@ -430,26 +271,14 @@ export default function LoginPage() {
                     label="Şifrə"
                     name="password"
                     rules={[
-                      {
-                        required: true,
-                        message:
-                          "Zəhmət olmasa şifrənizi daxil edin!",
-                      },
-                      {
-                        min: 6,
-                        message:
-                          "Şifrə minimum 6 simvol olmalıdır!",
-                      },
+                      { required: true, message: "Zəhmət olmasa şifrənizi daxil edin!" },
+                      { min: 6, message: "Şifrə minimum 6 simvol olmalıdır!" },
                     ]}
                   >
                     <Input.Password
                       prefix={<LockOutlined />}
                       iconRender={(visible) =>
-                        visible ? (
-                          <EyeTwoTone />
-                        ) : (
-                          <EyeInvisibleOutlined />
-                        )
+                        visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
                       }
                       placeholder="Şifrənizi daxil edin"
                       className="rounded-2xl h-14!"
@@ -473,9 +302,7 @@ export default function LoginPage() {
                     Artıq hesabınız var?{" "}
                     <span
                       className="font-semibold text-slate-900 cursor-pointer hover:underline"
-                      onClick={() =>
-                        setView("login")
-                      }
+                      onClick={() => setView("login")}
                     >
                       Daxil Ol
                     </span>

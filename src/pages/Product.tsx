@@ -6,6 +6,7 @@ import {
     InputNumber,
     message,
     Modal,
+    Popconfirm,
     Select,
     Switch,
     Table,
@@ -46,15 +47,27 @@ const getProductImages = (product: ProductItem): string[] => {
     if (Array.isArray(product.images) && product.images.length > 0) {
         return product.images
             .map((img) => {
-                if (img && typeof img === "object" && typeof img.url === "string" && img.url.trim() !== "") {
+                if (
+                    img &&
+                    typeof img === "object" &&
+                    typeof img.url === "string" &&
+                    img.url.trim() !== ""
+                ) {
                     return resolveImageUrl(img.url);
                 }
+
                 return null;
             })
-            .filter((url): url is string => url !== null && url !== "");
+            .filter(
+                (url): url is string =>
+                    url !== null && url !== "",
+            );
     }
 
-    if (typeof product.imageUrl === "string" && product.imageUrl.trim() !== "") {
+    if (
+        typeof product.imageUrl === "string" &&
+        product.imageUrl.trim() !== ""
+    ) {
         return [resolveImageUrl(product.imageUrl)];
     }
 
@@ -74,8 +87,13 @@ const getArray = <T,>(response: unknown): T[] => {
         if (Array.isArray(obj.items)) return obj.items as T[];
 
         if (obj.data && typeof obj.data === "object") {
-            const nested = obj.data as { items?: unknown };
-            if (Array.isArray(nested.items)) return nested.items as T[];
+            const nested = obj.data as {
+                items?: unknown;
+            };
+
+            if (Array.isArray(nested.items)) {
+                return nested.items as T[];
+            }
         }
     }
 
@@ -92,43 +110,73 @@ const Product = () => {
     const [images, setImages] = useState<File[]>([]);
     const [products, setProducts] = useState<ProductItem[]>([]);
     const [categories, setCategories] = useState<CategoryOption[]>([]);
+    const [editingProduct, setEditingProduct] =
+        useState<ProductItem | null>(null);
 
-    const [form] = Form.useForm<ProductFormValues>();
+    const [form] =
+        Form.useForm<ProductFormValues>();
 
     const fetchProducts = async () => {
         try {
             setFetching(true);
-            const res = await ProductService.getAll();
-            setProducts(getArray<ProductItem>(res));
-        } catch (error: unknown) {
+
+            const res =
+                await ProductService.getAll();
+
+            setProducts(
+                getArray<ProductItem>(res),
+            );
+        } catch (error) {
             console.error(error);
-            message.error("Products load failed");
+            message.error(
+                "Products load failed",
+            );
         } finally {
             setFetching(false);
         }
     };
 
-    const fetchCategories = async () => {
-        try {
-            const res = await axiosInstance.get("/categories/options");
+    const fetchCategories =
+        async () => {
+            try {
+                const res =
+                    await axiosInstance.get(
+                        "/categories/options",
+                    );
 
-            const raw = getArray<RawCategory>(res.data);
+                const raw =
+                    getArray<RawCategory>(
+                        res.data,
+                    );
 
-            const options: CategoryOption[] = raw.map((cat) => ({
-                value: String(cat.value || cat.id),
-                label: String(cat.label || cat.name),
-            }));
+                const options:
+                    CategoryOption[] =
+                    raw.map((cat) => ({
+                        value: String(
+                            cat.value ||
+                                cat.id,
+                        ),
+                        label: String(
+                            cat.label ||
+                                cat.name,
+                        ),
+                    }));
 
-            setCategories(options);
-        } catch (error: unknown) {
-            console.error(error);
-            message.error("Categories load failed");
-        }
-    };
+                setCategories(options);
+            } catch (error) {
+                console.error(error);
+                message.error(
+                    "Categories load failed",
+                );
+            }
+        };
 
     useEffect(() => {
         const load = async () => {
-            await Promise.all([fetchProducts(), fetchCategories()]);
+            await Promise.all([
+                fetchProducts(),
+                fetchCategories(),
+            ]);
         };
 
         load();
@@ -137,103 +185,297 @@ const Product = () => {
     const resetModal = () => {
         form.resetFields();
         setImages([]);
+        setEditingProduct(null);
         setOpen(false);
     };
 
-    const onFinish = async (values: ProductFormValues) => {
+    const handleEdit = (
+        product: ProductItem,
+    ) => {
+        setEditingProduct(product);
+
+        form.setFieldsValue({
+            name: product.name,
+            sku: product.sku,
+            description:
+                product.description,
+            price: product.price,
+            stock:
+                product.stock || 0,
+            categoryId:
+                product.categoryId,
+        });
+
+        setOpen(true);
+    };
+
+    const handleDelete =
+        async (id: string) => {
+            try {
+                await ProductService.delete(
+                    id,
+                );
+
+                message.success(
+                    "Product deleted",
+                );
+
+                await fetchProducts();
+            } catch (error) {
+                console.error(error);
+                message.error(
+                    "Delete failed",
+                );
+            }
+        };
+
+    const onFinish = async (
+        values: ProductFormValues,
+    ) => {
         try {
             setLoading(true);
 
-            let imageUrls: string[] = [];
+            let imageUrls: string[] =
+                [];
 
             if (images.length > 0) {
                 try {
-                    const upload = await UploadService.uploadProductImages(images);
-                    imageUrls = upload.urls;
-                } catch (error: unknown) {
-                    console.error(error);
-                    message.error("Image upload failed");
+                    const upload =
+                        await UploadService.uploadProductImages(
+                            images,
+                        );
+
+                    imageUrls =
+                        upload.urls;
+                } 
+                catch (error) {
+                    console.error(
+                        error,
+                    );
+
+                    message.error(
+                        "Image upload failed",
+                    );
+
                     return;
                 }
             }
 
-            await ProductService.create({
+            const payload = {
                 name: values.name,
                 sku: values.sku,
-                description: values.description,
-                price: Number(values.price),
-                stock: Number(values.stock || 0),
-                categoryId: values.categoryId,
-                isActive: values.isActive ?? true,
-                images: imageUrls.map((url, index) => ({
-                    url,
-                    sortOrder: index,
-                    isMain: index === 0,
-                })),
-            });
+                description:
+                    values.description,
+                price: Number(
+                    values.price,
+                ),
+                stock: Number(
+                    values.stock || 0,
+                ),
+                categoryId:
+                    values.categoryId,
+                isActive:
+                    values.isActive ??
+                    true,
+                images:
+                    imageUrls.map(
+                        (
+                            url,
+                            index,
+                        ) => ({
+                            url,
+                            sortOrder:
+                                index,
+                            isMain:
+                                index ===
+                                0,
+                        }),
+                    ),
+            };
 
-            message.success("Product created");
+            if (editingProduct) {
+                await ProductService.update(
+                    editingProduct.id,
+                    payload,
+                );
+
+                message.success(
+                    "Product updated",
+                );
+            } else {
+                await ProductService.create(
+                    payload,
+                );
+
+                message.success(
+                    "Product created",
+                );
+            }
+
             resetModal();
             await fetchProducts();
-        } catch (error: unknown) {
+        } catch (error) {
             console.error(error);
-            message.error("Product create failed");
+
+            message.error(
+                editingProduct
+                    ? "Product update failed"
+                    : "Product create failed",
+            );
         } finally {
             setLoading(false);
         }
     };
 
-    const handleImageUpload = (file: File) => {
-        const isValidType = ["image/jpeg", "image/png", "image/webp"].includes(file.type);
+    const handleImageUpload = (
+        file: File,
+    ) => {
+        const isValidType = [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+        ].includes(file.type);
 
         if (!isValidType) {
-            message.error("Only JPG, PNG, WEBP allowed");
+            message.error(
+                "Only JPG, PNG, WEBP allowed",
+            );
+
             return Upload.LIST_IGNORE;
         }
 
-        if (file.size > 5 * 1024 * 1024) {
+        if (
+            file.size >
+            5 * 1024 * 1024
+        ) {
             message.error("Max 5MB");
+
             return Upload.LIST_IGNORE;
         }
 
-        setImages((prev) => [...prev, file]);
+        setImages((prev) => [
+            ...prev,
+            file,
+        ]);
+
         return false;
     };
 
     const columns = [
         {
             title: "Image",
-            render: (_: unknown, product: ProductItem) => {
-                const imgs = getProductImages(product);
-                if (imgs.length === 0) return <span>-</span>;
+            render: (
+                _: unknown,
+                product: ProductItem,
+            ) => {
+                const imgs =
+                    getProductImages(
+                        product,
+                    );
+
+                if (
+                    imgs.length === 0
+                )
+                    return <span>-</span>;
+
                 return (
                     <Image
                         width={50}
                         height={50}
                         src={imgs[0]}
-                        style={{ objectFit: "cover", borderRadius: 4 }}
-                        fallback={FALLBACK_IMG}
+                        style={{
+                            objectFit:
+                                "cover",
+                            borderRadius: 4,
+                        }}
+                        fallback={
+                            FALLBACK_IMG
+                        }
                     />
                 );
             },
         },
-        { title: "Name", dataIndex: "name" },
-        { title: "SKU", dataIndex: "sku" },
+
+        {
+            title: "Name",
+            dataIndex: "name",
+        },
+
+        {
+            title: "SKU",
+            dataIndex: "sku",
+        },
+
         {
             title: "Price",
             dataIndex: "price",
-            render: (p: number) => `${p} AZN`,
+            render: (
+                p: number,
+            ) => `${p} AZN`,
         },
-        { title: "Stock", dataIndex: "stock" },
-        { title: "Description", dataIndex: "description" },
+
+        {
+            title: "Stock",
+            dataIndex: "stock",
+        },
+
+        {
+            title: "Description",
+            dataIndex:
+                "description",
+        },
+
+        {
+            title: "Actions",
+            render: (
+                _: unknown,
+                product: ProductItem,
+            ) => (
+                <div className="flex gap-2">
+                    <Button
+                        type="primary"
+                        onClick={() =>
+                            handleEdit(
+                                product,
+                            )
+                        }
+                    >
+                        Edit
+                    </Button>
+
+                    <Popconfirm
+                        title="Delete Product"
+                        description="Are you sure?"
+                        okText="Yes"
+                        cancelText="No"
+                        onConfirm={() =>
+                            handleDelete(
+                                product.id,
+                            )
+                        }
+                    >
+                        <Button danger>
+                            Delete
+                        </Button>
+                    </Popconfirm>
+                </div>
+            ),
+        },
     ];
 
     return (
         <div className="p-6">
             <div className="flex justify-between mb-5">
-                <h1 className="text-2xl font-bold">Products</h1>
+                <h1 className="text-2xl font-bold">
+                    Products
+                </h1>
 
-                <Button type="primary" onClick={() => setOpen(true)}>
+                <Button
+                    type="primary"
+                    onClick={() =>
+                        setOpen(true)
+                    }
+                >
                     Add Product
                 </Button>
             </div>
@@ -242,41 +484,99 @@ const Product = () => {
                 loading={fetching}
                 dataSource={products}
                 columns={columns}
-                rowKey={(r) => r.id}
+                rowKey="id"
             />
 
-            <Modal open={open} onCancel={resetModal} footer={null} title="Create Product">
+            <Modal
+                open={open}
+                onCancel={resetModal}
+                footer={null}
+                title={
+                    editingProduct
+                        ? "Edit Product"
+                        : "Create Product"
+                }
+            >
                 <Form
                     form={form}
                     layout="vertical"
                     onFinish={onFinish}
-                    initialValues={{ stock: 0, isActive: true }}
+                    initialValues={{
+                        stock: 0,
+                        isActive: true,
+                    }}
                 >
-                    <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+                    <Form.Item
+                        name="name"
+                        label="Name"
+                        rules={[
+                            {
+                                required: true,
+                            },
+                        ]}
+                    >
                         <Input />
                     </Form.Item>
 
-                    <Form.Item name="sku" label="SKU" rules={[{ required: true }]}>
+                    <Form.Item
+                        name="sku"
+                        label="SKU"
+                        rules={[
+                            {
+                                required: true,
+                            },
+                        ]}
+                    >
                         <Input />
                     </Form.Item>
 
-                    <Form.Item name="categoryId" label="Category" rules={[{ required: true }]}>
-                        <Select options={categories} />
+                    <Form.Item
+                        name="categoryId"
+                        label="Category"
+                        rules={[
+                            {
+                                required: true,
+                            },
+                        ]}
+                    >
+                        <Select
+                            options={
+                                categories
+                            }
+                        />
                     </Form.Item>
 
-                    <Form.Item name="description" label="Description">
+                    <Form.Item
+                        name="description"
+                        label="Description"
+                    >
                         <Input.TextArea />
                     </Form.Item>
 
-                    <Form.Item name="price" label="Price" rules={[{ required: true }]}>
+                    <Form.Item
+                        name="price"
+                        label="Price"
+                        rules={[
+                            {
+                                required: true,
+                            },
+                        ]}
+                    >
                         <InputNumber className="w-full" />
                     </Form.Item>
 
-                    <Form.Item name="stock" label="Stock">
+                    <Form.Item
+                        name="stock"
+                        label="Stock"
+                    >
                         <InputNumber className="w-full" />
                     </Form.Item>
 
-                    <Form.Item name="isActive" label="Active" valuePropName="checked">
+                    <Form.Item
+                        name="isActive"
+                        label="Active"
+                        valuePropName="checked"
+                    >
                         <Switch />
                     </Form.Item>
 
@@ -284,11 +584,25 @@ const Product = () => {
                         <Upload
                             multiple
                             listType="picture-card"
-                            beforeUpload={handleImageUpload}
-                            onRemove={(file: UploadFile) => {
-                                setImages((prev) =>
-                                    prev.filter((f) => f.name !== file.name),
+                            beforeUpload={
+                                handleImageUpload
+                            }
+                            onRemove={(
+                                file: UploadFile,
+                            ) => {
+                                setImages(
+                                    (
+                                        prev,
+                                    ) =>
+                                        prev.filter(
+                                            (
+                                                f,
+                                            ) =>
+                                                f.name !==
+                                                file.name,
+                                        ),
                                 );
+
                                 return true;
                             }}
                         >
@@ -296,8 +610,17 @@ const Product = () => {
                         </Upload>
                     </Form.Item>
 
-                    <Button type="primary" htmlType="submit" loading={loading} block>
-                        Create
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        loading={
+                            loading
+                        }
+                        block
+                    >
+                        {editingProduct
+                            ? "Update"
+                            : "Create"}
                     </Button>
                 </Form>
             </Modal>

@@ -48,4 +48,20 @@ export const ProductService = {
         const res = await axiosInstance.get<GetProductsResponse>("/products");
         return res.data;
     },
+    update: async (
+        id: string,
+        payload: CreateProductPayload,
+    ): Promise<ProductItem> => {
+        const res = await axiosInstance.patch<ProductItem>(
+            `/products/${id}`,
+            payload,
+        );
+
+        return res.data;
+    },
+
+    delete: async (id: string) => {
+        const res = await axiosInstance.delete(`/products/${id}`);
+        return res.data;
+    },
 };

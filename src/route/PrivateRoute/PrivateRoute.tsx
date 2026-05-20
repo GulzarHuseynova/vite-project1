@@ -1,11 +1,12 @@
-import { Route, Routes } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../../components/Layout";
-import { privateRoutes } from "./PrivateRoutes";
+import { privateRoutes } from "../PrivateRoute/PrivateRoutes";
 
 export default function PrivateRoutes() {
   return (
     <Routes>
-      {/* Layout wrapper */}
+      <Route path="/" element={<Navigate to="/home" replace />} />
+
       <Route element={<MainLayout />}>
         {privateRoutes.map((route) => (
           <Route
@@ -15,6 +16,8 @@ export default function PrivateRoutes() {
           />
         ))}
       </Route>
+
+      <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   );
 }
