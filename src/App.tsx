@@ -1,23 +1,37 @@
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+} from "react-router-dom";
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import LoginPage from './pages/Login';
-import Home from './pages/Home';
-import VerifyPage from './pages/Verify';
-import './App.css';
+import LoginPage from "./pages/Login";
+import Home from "./pages/Home";
+import VerifyPage from "./pages/Verify";
+import Categories from "./pages/Category";
+import Product from "./pages/Product";
+
+import "./App.css";
+
 import MainLayout from "./components/Layout";
 import ProtectedRoute from "./route/ProtectedRoute/ProtectedRoute";
-import Categories from './pages/Category';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* İlk açılan səhifə Login/Register olacaq */}
-        <Route path="/" element={<LoginPage />} />
+        {/* Login */}
+        <Route
+          path="/"
+          element={<LoginPage />}
+        />
 
-        {/* Register sonrası OTP doğrulama səhifəsi */}
-        <Route path="/verify" element={<VerifyPage />} />
-         <Route path='/category' element={<Categories/>}/>
+        {/* Verify */}
+        <Route
+          path="/verify"
+          element={<VerifyPage />}
+        />
+
+        {/* Protected Pages */}
         <Route
           element={
             <ProtectedRoute>
@@ -25,7 +39,20 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/home" element={<Home />} />
+          <Route
+            path="/home"
+            element={<Home />}
+          />
+
+          <Route
+            path="/category"
+            element={<Categories />}
+          />
+
+          <Route
+            path="/product"
+            element={<Product />}
+          />
         </Route>
       </Routes>
     </Router>

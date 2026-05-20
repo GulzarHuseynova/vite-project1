@@ -63,7 +63,7 @@ export default function MainLayout() {
       label: "Ana Səhifə",
     },
     {
-      key: "/products",
+      key: "/product",
       icon: <ShoppingOutlined />,
       label: "Məhsullar",
     },
@@ -182,7 +182,7 @@ export default function MainLayout() {
             />
           </div>
 
-          
+
           <div className="p-4 border-t border-slate-800">
             <Button
               danger
@@ -202,7 +202,7 @@ export default function MainLayout() {
       </Sider>
 
       <Layout>
-      
+
         <Header className="bg-white/80! backdrop-blur-xl px-6! flex items-center justify-between border-b border-slate-200 shadow-sm sticky top-0 z-50">
           <div className="flex items-center gap-4">
             <Button
