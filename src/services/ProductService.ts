@@ -31,12 +31,20 @@ export interface ProductItem {
     images?: ProductImage[];
 }
 
-export type GetProductsResponse =
-    | ProductItem[]
-    | {
-        data?: ProductItem[] | { items?: ProductItem[] };
-        items?: ProductItem[];
-    };
+export interface PaginatedProductsResponse {
+    data?: ProductItem[] | { items?: ProductItem[] };
+    items?: ProductItem[];
+    total?: number;
+    totalCount?: number;  
+    meta?: { total?: number };
+}
+
+export type GetProductsResponse = ProductItem[] | PaginatedProductsResponse;
+
+export interface GetAllParams {
+    page?: number;
+    pageSize?: number;
+}
 
 export const ProductService = {
     create: async (data: CreateProductPayload): Promise<ProductItem> => {
@@ -44,19 +52,13 @@ export const ProductService = {
         return res.data;
     },
 
-    getAll: async (): Promise<GetProductsResponse> => {
-        const res = await axiosInstance.get<GetProductsResponse>("/products");
+    getAll: async (params?: GetAllParams): Promise<GetProductsResponse> => {
+        const res = await axiosInstance.get<GetProductsResponse>("/products", { params });
         return res.data;
     },
-    update: async (
-        id: string,
-        payload: CreateProductPayload,
-    ): Promise<ProductItem> => {
-        const res = await axiosInstance.patch<ProductItem>(
-            `/products/${id}`,
-            payload,
-        );
 
+    update: async (id: string, payload: CreateProductPayload): Promise<ProductItem> => {
+        const res = await axiosInstance.patch<ProductItem>(`/products/${id}`, payload);
         return res.data;
     },
 

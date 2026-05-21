@@ -31,7 +31,7 @@ const Home = () => {
 
   const columns = [
     {
-      title: "Image",
+      title: "Şəkil",
       dataIndex: "imageUrl",
       key: "image",
       render: (image: string) => (
@@ -39,22 +39,22 @@ const Home = () => {
       ),
     },
     {
-      title: "Product Name",
+      title: "Məhsul Adı",
       dataIndex: "name",
       key: "name",
     },
     {
-      title: "Price",
+      title: "Qiymət",
       dataIndex: "price",
       key: "price",
     },
     {
-      title: "Stock",
+      title: "Stok",
       dataIndex: "stock",
       key: "stock",
     },
     {
-      title: "Category",
+      title: "Kategoriya",
       key: "category",
       render: (
         _: unknown,
@@ -71,25 +71,25 @@ const Home = () => {
     <div>
       <Row gutter={[16, 16]}>
         <Col span={6}>
-          <Card title="Total Users">
+          <Card title="Ümumi İstifadəçilər">
             {stats?.totalUsers}
           </Card>
         </Col>
 
         <Col span={6}>
-          <Card title="Verified Users">
+          <Card title="Təsdiqlənmiş İstifadəçilər">
             {stats?.verifiedUsers}
           </Card>
         </Col>
 
         <Col span={6}>
-          <Card title="Total Products">
+          <Card title="Ümumi Məhsullar">
             {stats?.totalProducts}
           </Card>
         </Col>
 
         <Col span={6}>
-          <Card title="Total Categories">
+          <Card title="Ümumi Kategoriyalar">
             {stats?.totalCategories}
           </Card>
         </Col>

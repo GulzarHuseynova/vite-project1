@@ -10,7 +10,7 @@ function App() {
   )
 
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       {isAuthenticated
         ? <PrivateRoute />
         : <PublicRoutes onLoginSuccess={() => setIsAuthenticated(true)} />
