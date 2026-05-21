@@ -43,7 +43,7 @@ const Categories = () => {
     setLoading(false);
   }
 };
-
+//test
 useEffect(() => {
   void Promise.resolve().then(fetchCategories);
 }, []);
