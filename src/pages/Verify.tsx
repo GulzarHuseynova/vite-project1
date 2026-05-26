@@ -13,36 +13,45 @@ import {
     NumberOutlined,
 } from "@ant-design/icons";
 
+import { AxiosError } from "axios";
+import type { BackendErrorResponse } from "../types/Verify.type";
 
 const { Title, Text } = Typography;
 
 export default function VerifyPage() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
     const location = useLocation();
 
     const email = location.state?.email ?? "";
 
-    const handleVerify = async (values: { code: string }) => {
-        setLoading(true);
 
-        try {
-            const response = await AuthService.verifyEmail({
-                email,
-                code: values.code,
-            });
 
-            localStorage.setItem("token", response.data.accessToken);
+const handleVerify = async (values: { code: string }): Promise<void> => {
+    setLoading(true);
 
-            navigate("/home");
+    try {
+        const response = await AuthService.verifyEmail({
+            email,
+            code: values.code,
+        });
 
-        } catch (error: any) {
-            console.log(error.response?.data);
-            alert("Kod səhvdir!");
-        } finally {
-            setLoading(false);
-        }
-    };
+        localStorage.setItem("token", response.data.accessToken);
+        navigate("/home");
+
+    } catch (err) {
+        // err obyektini birbaşa AxiosError olaraq tanıadırıq
+        const axiosError = err as AxiosError<BackendErrorResponse>;
+        
+        // İndi həm .response, həm də onun içindəki .data tam tiplidir
+        console.log(axiosError.response?.data); 
+        
+        alert("Kod səhvdir!");
+    } finally {
+        setLoading(false);
+    }
+};
 
     return (
         <div className="min-h-screen .bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 flex items-center justify-center p-4 overflow-hidden relative">

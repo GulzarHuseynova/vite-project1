@@ -18,41 +18,13 @@ import axiosInstance from "../../../services/AxiosInstance";
 
 import {
     ProductService,
-    type ProductItem,
 } from "../../../services/ProductService";
 
 import { UploadService } from "../../../services/UploadService";
 
 import ProductImageUpload from "./ProductImageUpload";
-
-interface Props {
-    open: boolean;
-    onClose: () => void;
-    onSuccess: () => void;
-    editingProduct?: ProductItem | null;
-}
-
-interface ProductFormValues {
-    name: string;
-    sku: string;
-    description?: string;
-    price: number;
-    stock?: number;
-    categoryId: string;
-    isActive?: boolean;
-}
-
-interface CategoryOption {
-    label: string;
-    value: string;
-}
-
-interface RawCategory {
-    id?: string;
-    value?: string;
-    name?: string;
-    label?: string;
-}
+import type { ProductFormValues, Props } from '../../../types/Product.type';
+import type { CategoryOption , RawCategory } from '../../../types/Category.type';
 
 const ProductModal = ({
     open,

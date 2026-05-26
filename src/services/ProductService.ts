@@ -9,7 +9,7 @@ export interface ProductImage {
 
 export interface CreateProductPayload {
     name: string;
-    sku: string;
+    sku?: string;
     description?: string;
     price: number;
     stock?: number;
@@ -22,7 +22,7 @@ export interface CreateProductPayload {
 export interface ProductItem {
     id: string;
     name: string;
-    sku: string;
+    sku?: string;
     description?: string;
     price: number;
     stock?: number;

@@ -3,12 +3,9 @@ import {
     useEffect,
     useState,
 } from "react";
-
 import ProductModal from "./components/ProductModal";
 import ProductTable from "./components/ProductTable";
-
 import { useProduct } from "../../hooks/UseProduct";
-
 import type { ProductItem } from "../../services/ProductService";
 
 const Product = () => {

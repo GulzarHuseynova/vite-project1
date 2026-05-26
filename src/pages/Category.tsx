@@ -10,7 +10,6 @@ import {
   Switch,
   Tag,
 } from "antd";
-
 import type { Category, CategoryForm } from "../types/Category.type";
 import { CategoryService } from "../services/CategoryService";
 
@@ -23,30 +22,31 @@ const Categories = () => {
 
   const [form] = Form.useForm();
 
- const fetchCategories = async () => {
-  setLoading(true);
+  const fetchCategories = async () => {
+    setLoading(true);
 
-  try {
-    const res = await CategoryService.getAll();
+    try {
+      const res = await CategoryService.getAll();
 
-    const list =
-      res.data?.data?.data ||
-      res.data?.data ||
-      res.data?.result ||
-      [];
+      const list =
+        res.data?.data?.data ||
+        res.data?.data ||
+        res.data?.result ||
+        [];
 
-    setData(Array.isArray(list) ? list : []);
-  } catch (err) {
-    console.log(err);
-    message.error("Kateqoriyalar yüklənmədi");
-  } finally {
-    setLoading(false);
-  }
-};
-//test
-useEffect(() => {
-  void Promise.resolve().then(fetchCategories);
-}, []);
+      setData(Array.isArray(list) ? list : []);
+    } catch (err) {
+      console.log(err);
+      message.error("Kateqoriyalar yüklənmədi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void Promise.resolve().then(fetchCategories);
+  }, []);
+
   const openCreateModal = () => {
     setEditingId(null);
     form.resetFields();
@@ -118,11 +118,21 @@ useEffect(() => {
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>Kateqoriyalar</h2>
+      <div className="flex justify-between items-center mb-5">
+        <h2 className="text-xl font-bold dark:text-white!">Kateqoriyalar</h2>
 
-      <Button type="primary" onClick={openCreateModal}>
-        + Yeni kateqoriya
-      </Button>
+        {/* + Yeni Kateqoriya Düyməsi (YAŞIL) */}
+        <Button
+          type="primary"
+          onClick={openCreateModal}
+          className="bg-green-600! text-white! border-green-600!
+                     hover:bg-green-700! hover:text-white!
+                     dark:bg-green-600! dark:text-white!
+                     dark:hover:bg-green-500!"
+        >
+          + Yeni kateqoriya
+        </Button>
+      </div>
 
       <Table
         loading={loading}
@@ -140,7 +150,13 @@ useEffect(() => {
             title: "Status",
             dataIndex: "isActive",
             render: (value) =>
-              value ? <Tag color="green">Aktiv</Tag> : <Tag>Passiv</Tag>,
+              value ? <Tag color="white" className="bg-green-600! text-white! border-green-600!
+                     hover:bg-green-700! hover:text-white!
+                     dark:bg-green-600! dark:text-white!
+                     dark:hover:bg-green-500!">Aktiv</Tag> : <Tag className="bg-green-600! text-white! border-green-600!
+                     hover:bg-green-700! hover:text-white!
+                     dark:bg-green-600! dark:text-white!
+                     dark:hover:bg-green-500!">Passiv</Tag>,
           },
           {
             title: "Məhsul sayı",
@@ -150,23 +166,36 @@ useEffect(() => {
           {
             title: "Əməliyyatlar",
             render: (_, record) => (
-              <>
+              <div className="flex gap-2">
+                {/* Redaktə Et Düyməsi (MAVİ/GÖY) */}
                 <Button
                   onClick={() => openEditModal(record)}
-                  style={{ marginRight: 10 }}
+                  className="bg-blue-600! text-white! border-blue-600!
+                             hover:bg-blue-700! hover:text-white!
+                             dark:bg-blue-600! dark:text-white!
+                             dark:hover:bg-blue-500!"
                 >
                   Redaktə et
                 </Button>
 
+                {/* Sil Düyməsi (KIRMIZI - İçi dolu, yazısı ağ) */}
                 <Popconfirm
                   title="Silmək istədiyinə əminsən?"
                   onConfirm={() => handleDelete(record.id)}
                   okText="Bəli"
                   cancelText="Xeyr"
                 >
-                  <Button danger>Sil</Button>
+                  <Button
+                    danger
+                    className="bg-red-600! text-white! border-red-600!
+                               hover:bg-red-700! hover:text-white!
+                               dark:bg-red-600! dark:text-white!
+                               dark:hover:bg-red-500!"
+                  >
+                    Sil
+                  </Button>
                 </Popconfirm>
-              </>
+              </div>
             ),
           },
         ]}

@@ -5,12 +5,17 @@ import type {
   DashboardStats,
   LatestProduct,
 } from "../types/Dashboard.type";
+import {
+  FALLBACK_IMG,
+  getProductImages,
+} from "../utils/ProductHelpers";
 
 const Home = () => {
   const [stats, setStats] =
     useState<DashboardStats | null>(null);
 
   const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     const fetchDashboardStats = async () => {
@@ -32,11 +37,34 @@ const Home = () => {
   const columns = [
     {
       title: "Şəkil",
-      dataIndex: "imageUrl",
       key: "image",
-      render: (image: string) => (
-        <Image width={60} src={image} />
-      ),
+      render: (
+        _: unknown,
+        record: LatestProduct
+      ) => {
+       const images =
+    getProductImages(
+        record,
+    );
+
+        return (
+          <Image
+            width={60}
+            height={60}
+            src={
+              images[0] ||
+              FALLBACK_IMG
+            }
+            fallback={
+              FALLBACK_IMG
+            }
+            style={{
+              objectFit: "cover",
+              borderRadius: 8,
+            }}
+          />
+        );
+      },
     },
     {
       title: "Məhsul Adı",

@@ -35,10 +35,10 @@ const ProductTable = ({ products, loading, pagination, onPageChange, onEdit, onD
                 );
             },
         },
-        { title: "Ad",      dataIndex: "name"        },
-        { title: "SKU",     dataIndex: "sku"         },
-        { title: "Qiymət",  dataIndex: "price",  render: (price: number) => `${price} AZN` },
-        { title: "Stock",   dataIndex: "stock"       },
+        { title: "Ad", dataIndex: "name" },
+        { title: "SKU", dataIndex: "sku" },
+        { title: "Qiymət", dataIndex: "price", render: (price: number) => `${price} AZN` },
+        { title: "Stock", dataIndex: "stock" },
         { title: "Açıqlama", dataIndex: "description" },
         {
             title: "Actions",
@@ -52,7 +52,13 @@ const ProductTable = ({ products, loading, pagination, onPageChange, onEdit, onD
                         cancelText="No"
                         onConfirm={() => onDelete(product.id)}
                     >
-                        <Button danger>Sil</Button>
+                        <Button danger className="bg-red-600! text-white! border-red-600!
+                              hover:bg-red-700! hover:text-white! hover:border-red-700!
+                              dark:bg-red-600! dark:text-white! dark:border-red-600!
+                              dark:hover:bg-red-500! dark:hover:text-white! dark:hover:border-red-500!"
+                        >
+                            Sil
+                        </Button>
                     </Popconfirm>
                 </div>
             ),

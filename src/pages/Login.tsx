@@ -2,9 +2,15 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthService } from "../services/AuthService";
-import type { LoginForm } from "../types/Login.type";
-import type { RegisterForm } from "../types/Register.type";
 import { Button, Form, Input, Typography, message } from "antd";
+
+// 1. REDUX BAĞLANTILARI
+import { useDispatch } from "react-redux";
+import { setUser } from "../redux/authSlice"; // Qovluq yolunu layihənə uyğun yoxla
+
+// 2. TYPESCRIPT TİPLƏRİ (import type ilə xətaların qarşısını alırıq)
+import type { LoginForm, Props, ApiErrorResponse } from "../types/Login.type";
+import type { RegisterForm } from "../types/Register.type"; // <-- RegisterForm-u öz faylına köçürdük!
 
 import {
   LockOutlined,
@@ -15,16 +21,6 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 
-interface Props {
-  onLoginSuccess: () => void;
-}
-
-interface ApiErrorResponse {
-  message?: string | string[];
-  error?: string;
-  title?: string;
-}
-
 const { Title, Text } = Typography;
 
 export default function LoginPage({ onLoginSuccess }: Props) {
@@ -33,6 +29,7 @@ export default function LoginPage({ onLoginSuccess }: Props) {
   const [messageApi, contextHolder] = message.useMessage();
 
   const navigate = useNavigate();
+  const dispatch = useDispatch(); // Redux dispatch funksiyası
 
   const getErrorMessage = (error: unknown, fallback: string) => {
     if (!axios.isAxiosError<ApiErrorResponse>(error)) {
@@ -92,7 +89,9 @@ export default function LoginPage({ onLoginSuccess }: Props) {
           profileResponse?.data;
 
         if (user) {
+          // 3. Məlumatı həm localStorage-a yazırıq, həm də Redux Store-a göndəririk
           localStorage.setItem("user", JSON.stringify(user));
+          dispatch(setUser(user)); 
         }
       } catch {
         messageApi.warning("Profil məlumatı yüklənmədi.");
@@ -140,6 +139,7 @@ export default function LoginPage({ onLoginSuccess }: Props) {
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-slate-400/20 blur-[120px] rounded-full" />
 
         <div className="relative w-full max-w-7xl bg-white/80 backdrop-blur-xl border border-white rounded-2rem shadow-[0_20px_80px_rgba(0,0,0,0.12)] overflow-hidden grid lg:grid-cols-2">
+          {/* Sol Panel - Dizayn */}
           <div className="hidden lg:flex relative bg-slate-900 text-white p-14 flex-col justify-between overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_35%)]" />
 
@@ -178,28 +178,24 @@ export default function LoginPage({ onLoginSuccess }: Props) {
               <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shrink-0">
                 🔐
               </div>
-
               <div>
                 <h3 className="font-semibold text-lg">
                   Minlərlə istifadəçinin etibarı
                 </h3>
                 <p className="text-slate-300 text-sm mt-1 leading-6">
-                  Müasir veb tətbiqləri üçün gözəl və təhlükəsiz autentifikasiya
-                  interfeysi.
+                  Müasir veb tətbiqləri üçün gözəl və təhlükəsiz autentifikasiya interfeysi.
                 </p>
               </div>
             </div>
           </div>
 
+          {/* Sağ Panel - Formlar */}
           <div className="flex items-center justify-center p-8 md:p-14 bg-white/70 backdrop-blur-xl">
             <div className="w-full max-w-md">
               {view === "login" ? (
                 <>
                   <div className="mb-8 text-center lg:text-left">
-                    <Title
-                      level={2}
-                      className="mb-2! text-slate-900! text-4xl!"
-                    >
+                    <Title level={2} className="mb-2! text-slate-900! text-4xl!">
                       Daxil Ol
                     </Title>
                     <Text className="text-slate-500! !text-base!">
@@ -217,14 +213,8 @@ export default function LoginPage({ onLoginSuccess }: Props) {
                       label="E-poçt Ünvanı"
                       name="email"
                       rules={[
-                        {
-                          required: true,
-                          message: "Zəhmət olmasa e-poçtunuzu daxil edin!",
-                        },
-                        {
-                          type: "email",
-                          message: "E-poçt formatı yanlışdır!",
-                        },
+                        { required: true, message: "Zəhmət olmasa e-poçtunuzu daxil edin!" },
+                        { type: "email", message: "E-poçt formatı yanlışdır!" },
                       ]}
                     >
                       <Input
@@ -238,14 +228,8 @@ export default function LoginPage({ onLoginSuccess }: Props) {
                       label="Şifrə"
                       name="password"
                       rules={[
-                        {
-                          required: true,
-                          message: "Zəhmət olmasa şifrənizi daxil edin!",
-                        },
-                        {
-                          min: 6,
-                          message: "Şifrə minimum 6 simvol olmalıdır!",
-                        },
+                        { required: true, message: "Zəhmət olmasa şifrənizi daxil edin!" },
+                        { min: 6, message: "Şifrə minimum 6 simvol olmalıdır!" },
                       ]}
                     >
                       <Input.Password
@@ -285,15 +269,11 @@ export default function LoginPage({ onLoginSuccess }: Props) {
               ) : (
                 <>
                   <div className="mb-8 text-center lg:text-left">
-                    <Title
-                      level={2}
-                      className="mb-2! !text-slate-900! text-4xl!"
-                    >
+                    <Title level={2} className="mb-2! !text-slate-900! text-4xl!">
                       Hesab Yarat
                     </Title>
                     <Text className="text-slate-500! !text-base!">
-                      Başlamaq üçün qeydiyyatdan keçin. Təsdiq kodu Telegram-a
-                      göndəriləcək.
+                      Başlamaq üçün qeydiyyatdan keçin. Təsdiq kodu Telegram-a göndəriləcək.
                     </Text>
                   </div>
 
@@ -306,12 +286,7 @@ export default function LoginPage({ onLoginSuccess }: Props) {
                     <Form.Item
                       label="Ad"
                       name="firstName"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Zəhmət olmasa adınızı daxil edin!",
-                        },
-                      ]}
+                      rules={[{ required: true, message: "Zəhmət olmasa adınızı daxil edin!" }]}
                     >
                       <Input
                         prefix={<UserOutlined />}
@@ -323,12 +298,7 @@ export default function LoginPage({ onLoginSuccess }: Props) {
                     <Form.Item
                       label="Soyad"
                       name="lastName"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Zəhmət olmasa soyadınızı daxil edin!",
-                        },
-                      ]}
+                      rules={[{ required: true, message: "Zəhmət olmasa soyadınızı daxil edin!" }]}
                     >
                       <Input
                         prefix={<UserOutlined />}
@@ -341,14 +311,8 @@ export default function LoginPage({ onLoginSuccess }: Props) {
                       label="E-poçt Ünvanı"
                       name="email"
                       rules={[
-                        {
-                          required: true,
-                          message: "Zəhmət olmasa e-poçtunuzu daxil edin!",
-                        },
-                        {
-                          type: "email",
-                          message: "E-poçt formatı yanlışdır!",
-                        },
+                        { required: true, message: "Zəhmət olmasa e-poçtunuzu daxil edin!" },
+                        { type: "email", message: "E-poçt formatı yanlışdır!" },
                       ]}
                     >
                       <Input
@@ -362,14 +326,8 @@ export default function LoginPage({ onLoginSuccess }: Props) {
                       label="Şifrə"
                       name="password"
                       rules={[
-                        {
-                          required: true,
-                          message: "Zəhmət olmasa şifrənizi daxil edin!",
-                        },
-                        {
-                          min: 6,
-                          message: "Şifrə minimum 6 simvol olmalıdır!",
-                        },
+                        { required: true, message: "Zəhmət olmasa şifrənizi daxil edin!" },
+                        { min: 6, message: "Şifrə minimum 6 simvol olmalıdır!" },
                       ]}
                     >
                       <Input.Password

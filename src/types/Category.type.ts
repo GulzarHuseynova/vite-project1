@@ -13,3 +13,15 @@ export interface CategoryForm {
   description?: string;
   isActive: boolean;
 }
+
+ export interface CategoryOption {
+    label: string;
+    value: string;
+}
+
+  export interface RawCategory {
+    id?: string;
+    value?: string;
+    name?: string;
+    label?: string;
+}
