@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { CategoryForm } from "../types/Category.type";
 
-const API_URL = "http://161.97.154.119/intern-api/api";
+const API_URL = "/intern-api/api";
 
 const getToken = () => {
   return (

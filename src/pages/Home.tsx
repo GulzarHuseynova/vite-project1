@@ -48,21 +48,12 @@ const Home = () => {
     );
 
         return (
-          <Image
-            width={60}
-            height={60}
-            src={
-              images[0] ||
-              FALLBACK_IMG
-            }
-            fallback={
-              FALLBACK_IMG
-            }
-            style={{
-              objectFit: "cover",
-              borderRadius: 8,
-            }}
-          />
+           <Image
+                        width={50} height={50}
+                        src={images[0] ? images[0].replace("http://161.97.154.119", "") : FALLBACK_IMG}
+                        fallback={FALLBACK_IMG}
+                        style={{ objectFit: "cover", borderRadius: 8 }}
+                    />
         );
       },
     },
