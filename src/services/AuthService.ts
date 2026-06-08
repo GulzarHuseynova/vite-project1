@@ -3,7 +3,7 @@ import type { RegisterForm } from "../types/Register.type";
 import type { LoginForm } from "../types/Login.type";
 import type { VerifyForm } from "../types/Verify.type";
 
-const API_URL = "http://161.97.154.119/intern-api/api";
+const API_URL = "/intern-api/api";
 
 
 
