@@ -28,7 +28,7 @@ const ProductTable = ({ products, loading, pagination, onPageChange, onEdit, onD
                 return (
                     <Image
                         width={50} height={50}
-                        src={imgs[0]}
+                        src={imgs[0] ? imgs[0].replace("http://161.97.154.119", "") : FALLBACK_IMG}
                         fallback={FALLBACK_IMG}
                         style={{ objectFit: "cover", borderRadius: 8 }}
                     />

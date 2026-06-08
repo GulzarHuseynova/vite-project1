@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/intern-api/api/:match*",
-      "destination": "http://161.97.154.119/intern-api/api/:match*"
+      "source": "/intern-api/:match*",
+      "destination": "http://161.97.154.119/intern-api/:match*"
     },
     {
       "source": "/(.*)",
