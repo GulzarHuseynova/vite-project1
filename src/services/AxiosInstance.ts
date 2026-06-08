@@ -3,7 +3,8 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 
-const API_URL = "http://161.97.154.119/intern-api/api";
+
+const API_URL = "/intern-api/api";
 
 interface RetryRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
