@@ -7,4 +7,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+   server: {
+    proxy: {
+      '/intern-api': {
+        target: 'http://161.97.154.119',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 });
